@@ -76,3 +76,37 @@ count_aisle %>%
   scale_x_continuous(breaks = c(10000, 30000, 50000, 80000, 150000))
 ```
 
+__·Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.__
+
+```{r, message = FALSE}
+instacart %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle, product_name) %>% 
+  summarize(n_items = n()) %>% 
+  filter(min_rank(desc(n_items)) < 4) %>% 
+  arrange(desc(n_items), by_group = TRUE) %>% 
+  knitr::kable(digits = 1)
+
+#generate a plot
+instacart %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle, product_name) %>% 
+  summarize(n_items = n()) %>% 
+  filter(min_rank(desc(n_items)) < 4) %>% 
+  mutate(product_name = fct_reorder(product_name, n_items)) %>% 
+  ggplot(aes(y = product_name, x = n_items, fill = aisle)) +
+  geom_col() +
+  labs(
+    title = "Most Popular Items",
+    x = "Number of items ordered",
+    y = "Product"
+  ) +
+  scale_x_continuous(
+    trans = "sqrt",
+    breaks = c(30, 400, 5000, 10000)
+  ) +
+  facet_grid(aisle ~ ., scales = "free_y")
+```
+
+__·Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).__
+

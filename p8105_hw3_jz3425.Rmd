@@ -1,0 +1,78 @@
+---
+title: "p8105_hw3_jz3425"
+author: "Jibei Zheng"
+date: 10/17/2021
+output: github_document
+---
+
+```{r, message = FALSE}
+library(tidyverse)
+library(p8105.datasets)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Problem 1
+
+Load instacart dataset.
+
+```{r}
+data("instacart")
+
+count_users = count(instacart, user_id)
+```
+
+__Description of the dataset:__
+
+This instacart dataset is an anonymized dataset with `r nrow(instacart)` observations of `r nrow(count_users)` unique users and one order from each of them. Each row represents one product of an order. There are `r ncol(instacart)` variables. Key variables include `user_id` and `product_id`, `add_to_cart_order`: order in which each product was added to cart, `reordered`: if one product has been reordered, `order_dow` and `order_hour_of_day`: day and time an order was placed, and categories information of each product.
+
+
+For example:
+
+```{r}
+#example df
+order_1 = instacart %>% 
+  filter(order_id == 1)
+
+knitr::kable(order_1, digits = 1)
+```
+
+These rows show an order from user `r order_1[1, 5]` of `r nrow(order_1)` products by the order in which they were added to the cart, each with name, aisle and department information. The order was placed on Thursday `r order_1[1, 9]`(in 24 hour system). 4 products were reordered. It had been `r order_1[1, 10]` days since the last order of this user. 
+
+__·How many aisles are there, and which aisles are the most items ordered from?__
+
+```{r}
+count_aisle = 
+  instacart %>% 
+  group_by(aisle) %>% 
+  summarize(n_obs = n()) %>% 
+  arrange(desc(n_obs))
+count_aisle
+```
+
+There are `r nrow(count_aisle)` aisles, and fresh vegetables are the most items ordered from.
+
+__·Make a plot that shows the number of items ordered in each aisle, limiting this to aisles with more than 10000 items ordered. Arrange aisles sensibly, and organize your plot so others can read it.__
+
+```{r}
+count_aisle %>% 
+  filter(n_obs > 10000) %>% 
+  mutate(aisle = fct_reorder(aisle, n_obs)) %>% 
+  ggplot(aes(x = n_obs, y = aisle)) +
+  geom_col() +
+  labs(
+    title = "Aisle Plot",
+    x = "Number of items ordered",
+    y = "Aisle"
+  ) +
+  scale_x_continuous(breaks = c(10000, 30000, 50000, 80000, 150000))
+```
+

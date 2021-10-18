@@ -230,4 +230,46 @@ accel_df =
 accel_df
 ```
 
-This accelerometers dataset is from contains `r nrow(accel_df)` observations of activity counts for each minute of a 24-hour dayx starting at midnight(1440 per day) within 5 weeks(35 days) of a 63 year-old male with BMI 25. There are `r ncol(accel_df)` variables including week id, day id, minute id and most important, activity.
+This accelerometers dataset is from contains `r nrow(accel_df)` observations of activity counts for each minute of a 24-hour dayx starting at midnight(1440 per day) within 5 weeks(35 days) of a 63 year-old male with BMI 25. There are `r ncol(accel_df)` variables including week id, day id, minute id and most important, activity. Not very sure why the days are in weird order, but I decide to follow the order of day_id first, and I will reorder them chronologically in next steps.
+
+__Aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals.__
+
+```{r, message = FALSE}
+#plot in day_id order
+accel_df %>% 
+  group_by(day_id) %>% 
+  summarize(total_activity = sum(activity)) %>% 
+  ggplot(aes(x = day_id, y = total_activity)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Total activity plot in day_id order",
+    x = "Day",
+    y = "Total Activity"
+  ) +
+  scale_x_continuous(
+    breaks = c(7, 14, 21, 28, 35)
+  )
+  
+#plot in chronological order
+accel_df %>% 
+  mutate(day = factor(day, levels = c("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"))) %>% 
+  arrange(week_id, day) %>% 
+  group_by(week_id, day) %>% 
+  summarize(total_activity = sum(activity)) %>% 
+  ungroup() %>% 
+  mutate(day_id = c(1:35)) %>% 
+  ggplot(aes(y = total_activity, x = day_id)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Total activity plot in chronological order",
+    x = "Day",
+    y = "Total Activity"
+  ) +
+  scale_x_continuous(
+    breaks = c(7, 14, 21, 28, 35)
+  )
+```
+
+Both plots do not show apparent trends.

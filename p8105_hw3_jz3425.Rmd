@@ -185,3 +185,17 @@ brfss_df %>%
 ```
 
 Maybe it's a bad idea to put all the lines in one plot.
+
+__Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses(“Poor” to “Excellent”) among locations in NY State.__
+
+```{r, fig.height=10}
+brfss_df %>% 
+  filter(state == "NY") %>% 
+  filter(year %in% c(2010, 2006)) %>% 
+  select(year, county, response, data_value) %>% 
+  ggplot(aes(x = response, y = data_value, color = county, group = 1)) +
+  geom_point() +
+  geom_line() +
+  facet_grid(county ~ year)
+```
+

@@ -76,6 +76,8 @@ count_aisle %>%
   scale_x_continuous(breaks = c(10000, 30000, 50000, 80000, 150000))
 ```
 
+There are 39 aisles with more than 10000 items ordered, among which fresh vegetables and fresh fruits are the most popular with more than 150000 orders.
+
 __·Make a table showing the three most popular items in each of the aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”. Include the number of times each item is ordered in your table.__
 
 ```{r, message = FALSE}
@@ -84,9 +86,13 @@ instacart %>%
   group_by(aisle, product_name) %>% 
   summarize(n_items = n()) %>% 
   filter(min_rank(desc(n_items)) < 4) %>% 
-  arrange(desc(n_items), by_group = TRUE) %>% 
+  arrange(desc(n_items), .by_group = TRUE) %>% 
   knitr::kable(digits = 1)
+```
 
+Among these three aisles, the most popular one is packaged vegetables fruits, each product with thousands of orders; the least popular one is dog food care, each product with only less than 30 orders, probably because they are less frequently needed.
+
+```{r}
 #generate a plot
 instacart %>% 
   filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
@@ -99,7 +105,7 @@ instacart %>%
   labs(
     title = "Most Popular Items",
     x = "Number of items ordered",
-    y = "Product"
+    y = "Item"
   ) +
   scale_x_continuous(
     trans = "sqrt",
@@ -126,3 +132,42 @@ instacart %>%
   knitr::kable(digits = 1)
 ```
 
+On most of the days, people buy coffee ice creams a little later than pink lady apples, conforming to the finding that healthier food tends to be purchased earlier in the day.
+
+## Problem 2
+
+Load BRFSS SMART 2010 data
+
+```{r, warning = FALSE}
+data("brfss_smart2010")
+
+brfss_df = 
+  brfss_smart2010 %>% 
+  janitor::clean_names() %>% 
+  filter(topic == "Overall Health") %>% 
+  mutate(response = factor(response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"))) 
+```
+
+__·In 2002, which states were observed at 7 or more locations? What about in 2010?__
+
+```{r}
+brfss_df %>% 
+  filter(year == 2002) %>% 
+  group_by(locationabbr) %>% 
+  summarize(n_obs = n() / 5) %>% 
+  filter(n_obs >= 7) %>% 
+  knitr::kable(digits = 1)
+```
+
+There were 6 states listed above which observed at 7 or more locations.
+
+```{r}
+brfss_df %>% 
+  filter(year == 2010) %>% 
+  group_by(locationabbr) %>% 
+  summarize(n_obs = n() / 5) %>% 
+  filter(n_obs >= 7) %>% 
+  knitr::kable(digits = 1)
+```
+
+There were 14 states listed above which observed at 7 or more locations, many more than 2002.

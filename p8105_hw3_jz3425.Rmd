@@ -219,7 +219,7 @@ accel_df =
     ),
     day = str_to_lower(day),
   ) %>% 
-  rename(week_id = week) %>% 
+  rename(week_id = week, day_of_week = day) %>% 
   pivot_longer(
     activity_1:activity_1440,
     names_to = "minute_id",
@@ -253,9 +253,9 @@ accel_df %>%
   
 #plot in chronological order
 accel_df %>% 
-  mutate(day = factor(day, levels = c("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"))) %>% 
-  arrange(week_id, day) %>% 
-  group_by(week_id, day) %>% 
+  mutate(day_of_week = factor(day_of_week, levels = c("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"))) %>% 
+  arrange(week_id, day_of_week) %>% 
+  group_by(week_id, day_of_week) %>% 
   summarize(total_activity = sum(activity)) %>% 
   ungroup() %>% 
   mutate(day_id = c(1:35)) %>% 
@@ -273,3 +273,20 @@ accel_df %>%
 ```
 
 Both plots do not show apparent trends.
+
+__Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week.__
+
+```{r, message = FALSE}
+accel_df %>% 
+  mutate(
+    minute_id = as.numeric(minute_id),
+    hour_id = floor((minute_id - 1) / 60)
+  ) %>% 
+  group_by(day_of_week, hour_id) %>% 
+  summarize(hour_activity = sum(activity) / 5) %>% 
+  ggplot(aes(x = hour_id, y = hour_activity, color = day_of_week)) +
+  geom_point() +
+  geom_line()
+```
+
+This is a plot taking the mean of 24-hour activity time of every Monday to Sunday within 5 weeks. This man has a rather relugar schedule. We can see that 0-5 a.m. looks like sleeping time, and after 5 a.m. the man starts to move; after 8 p.m. activity starts to reduce. Among day of week, he seems to have high activity at Friday and Monday nights, and low activity at Sunday and Tuesday nights. On Sunday morning he has high activity, maybe having some routines.

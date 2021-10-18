@@ -92,7 +92,7 @@ instacart %>%
 
 Among these three aisles, the most popular one is packaged vegetables fruits, each product with thousands of orders; the least popular one is dog food care, each product with only less than 30 orders, probably because they are less frequently needed.
 
-```{r}
+```{r, message = FALSE}
 #generate a plot
 instacart %>% 
   filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
@@ -136,7 +136,7 @@ On most of the days, people buy coffee ice creams a little later than pink lady 
 
 ## Problem 2
 
-Load BRFSS SMART 2010 data
+Load BRFSS SMART 2010 data and clean it.
 
 ```{r, warning = FALSE}
 data("brfss_smart2010")
@@ -145,6 +145,7 @@ brfss_df =
   brfss_smart2010 %>% 
   janitor::clean_names() %>% 
   filter(topic == "Overall Health") %>% 
+  rename(state = locationabbr, county = locationdesc) %>% 
   mutate(response = factor(response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"))) 
 ```
 
@@ -153,7 +154,7 @@ __·In 2002, which states were observed at 7 or more locations? What about in 20
 ```{r}
 brfss_df %>% 
   filter(year == 2002) %>% 
-  group_by(locationabbr) %>% 
+  group_by(state) %>% 
   summarize(n_obs = n() / 5) %>% 
   filter(n_obs >= 7) %>% 
   knitr::kable(digits = 1)
@@ -164,10 +165,23 @@ There were 6 states listed above which observed at 7 or more locations.
 ```{r}
 brfss_df %>% 
   filter(year == 2010) %>% 
-  group_by(locationabbr) %>% 
+  group_by(state) %>% 
   summarize(n_obs = n() / 5) %>% 
   filter(n_obs >= 7) %>% 
   knitr::kable(digits = 1)
 ```
 
-There were 14 states listed above which observed at 7 or more locations, many more than 2002.
+There were 14 states listed above which observed at 7 or more locations, 8 more than 2002.
+
+__Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state.__
+
+```{r, fig.height=10, message = FALSE, warning = FALSE}
+brfss_df %>% 
+  filter(response == "Excellent") %>% 
+  group_by(year, state) %>% 
+  summarize(average_data_value = mean(data_value)) %>% 
+  ggplot(aes(x = year, y = average_data_value, color = state)) +
+  geom_line()
+```
+
+Maybe it's a bad idea to put all the lines in one plot.

@@ -186,7 +186,10 @@ excellent_df
 
 excellent_df %>% 
   ggplot(aes(x = year, y = average_data_value, color = state)) +
-  geom_line()
+  geom_line() +
+  labs(
+    title = "Excellenet response over year"
+  )
 ```
 
 Maybe it's a bad idea to put all the lines in one plot.
@@ -198,10 +201,12 @@ brfss_df %>%
   filter(state == "NY") %>% 
   filter(year %in% c(2010, 2006)) %>% 
   select(year, county, response, data_value) %>% 
-  ggplot(aes(x = response, y = data_value, color = county, group = 1)) +
-  geom_point() +
-  geom_line() +
-  facet_grid(county ~ year)
+  ggplot(aes(x = response, y = data_value, fill = county, group = 1)) +
+  geom_col() +
+  facet_grid(county ~ year) +
+  labs(
+    title = "Distribution of responses in NY State"
+  )
 ```
 
 ## Problem 3
@@ -286,7 +291,12 @@ accel_df %>%
   summarize(hour_activity = sum(activity) / 5) %>% 
   ggplot(aes(x = hour_id, y = hour_activity, color = day_of_week)) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  labs(
+    title = "24-hour activity plot",
+    x = "hour of day",
+    y = "hour activity"
+  )
 ```
 
 This is a plot taking the mean of 24-hour activity time of every Monday to Sunday within 5 weeks. This man has a rather relugar schedule. We can see that 0-5 a.m. looks like sleeping time, and after 5 a.m. the man starts to move; after 8 p.m. activity starts to reduce. Among day of week, he seems to have high activity at Friday and Monday nights, and low activity at Sunday and Tuesday nights. On Sunday morning he has high activity, maybe having some routines.

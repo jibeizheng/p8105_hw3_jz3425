@@ -186,6 +186,7 @@ excellent_df
 
 excellent_df %>% 
   ggplot(aes(x = year, y = average_data_value, color = state)) +
+  geom_point() +
   geom_line() +
   labs(
     title = "Excellenet response over year"
@@ -235,15 +236,21 @@ accel_df =
 accel_df
 ```
 
-This accelerometers dataset is from contains `r nrow(accel_df)` observations of activity counts for each minute of a 24-hour dayx starting at midnight(1440 per day) within 5 weeks(35 days) of a 63 year-old male with BMI 25. There are `r ncol(accel_df)` variables including week id, day id, minute id and most important, activity. Not very sure why the days are in weird order, but I decide to follow the order of day_id first, and I will reorder them chronologically in next steps.
+This accelerometers dataset is from contains `r nrow(accel_df)` observations of activity counts for each minute of a 24-hour dayx starting at midnight(1440 per day) within 5 weeks(35 days) of a 63 year-old male with BMI 25. There are `r ncol(accel_df)` variables including week id, day id, minute id and most important, activity. Not very sure why the day of week are in weird order, but I decide to follow the order of day_id first, and I will reorder them chronologically in next steps.
 
-__Aggregate accross minutes to create a total activity variable for each day, and create a table showing these totals.__
+__Aggregate across minutes to create a total activity variable for each day, and create a table showing these totals.__
 
 ```{r, message = FALSE}
-#plot in day_id order
+#table in day_id order
+total_activity_day_a =
 accel_df %>% 
-  group_by(day_id) %>% 
-  summarize(total_activity = sum(activity)) %>% 
+  group_by(day_id, week_id, day_of_week) %>% 
+  summarize(total_activity = sum(activity))
+
+knitr::kable(total_activity_day_a, digits = 1)
+
+#plot in day_id order
+total_activity_day_a %>% 
   ggplot(aes(x = day_id, y = total_activity)) +
   geom_point() +
   geom_line() +
@@ -256,12 +263,18 @@ accel_df %>%
     breaks = c(7, 14, 21, 28, 35)
   )
   
-#plot in chronological order
+#table in chronological order
+total_activity_day_b =
 accel_df %>% 
   mutate(day_of_week = factor(day_of_week, levels = c("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"))) %>% 
   arrange(week_id, day_of_week) %>% 
   group_by(week_id, day_of_week) %>% 
-  summarize(total_activity = sum(activity)) %>% 
+  summarize(total_activity = sum(activity))
+
+knitr::kable(total_activity_day_b, digits = 1)
+
+#plot in chronological order
+total_activity_day_b %>% 
   ungroup() %>% 
   mutate(day_id = c(1:35)) %>% 
   ggplot(aes(y = total_activity, x = day_id)) +
@@ -296,7 +309,11 @@ accel_df %>%
     title = "24-hour activity plot",
     x = "hour of day",
     y = "hour activity"
+  ) +
+  scale_x_continuous(
+    breaks = c(0, 4, 8, 12, 16, 20, 24),
+    labels = c("12am", "4am", "8am", "12pm", "4pm", "8pm", "12am")
   )
 ```
 
-This is a plot taking the mean of 24-hour activity time of every Monday to Sunday within 5 weeks. This man has a rather relugar schedule. We can see that 0-5 a.m. looks like sleeping time, and after 5 a.m. the man starts to move; after 8 p.m. activity starts to reduce. Among day of week, he seems to have high activity at Friday and Monday nights, and low activity at Sunday and Tuesday nights. On Sunday morning he has high activity, maybe having some routines.
+This is a plot taking the mean of 24-hour activity time of every Monday to Sunday within 5 weeks. This man has a rather regular schedule. We can see that 0-5 a.m. looks like sleeping time, and after 5 a.m. the man starts to move; after 8 p.m. activity starts to reduce. Among day of week, he seems to have high activity at Friday and Monday nights, and low activity at Sunday and Tuesday nights. On Sunday morning he has high activity, maybe having some routines.
